@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+	"parameters": {
+		"service_bus_namespace_name": {
+			"value": "namespaceteste"
+		},
+		"resource_location": {
+			"value": "southcentralus"
+		},
+		"queue_name": {
+			"value": "queuetest"
+		},
+		"topic_name": {
+			"value": "topictest"
+		}
+	}
+}

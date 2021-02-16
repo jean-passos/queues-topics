@@ -1,0 +1,210 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"service_bus_namespace_name": {
+			"type": "string"
+		},
+		"resource_location": {
+			"type": "string"
+		},
+		"queue_name": {
+			"type": "string"
+		},
+		"topic_name": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"unique_service_bus_namespace_name": "[concat(parameters('service_bus_namespace_name'), uniqueString(resourceGroup().id))]",
+		"sas_key_name": "EventDrivenSendListen",
+		"auth_rule_resource_id": "[resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('unique_service_bus_namespace_name'), variables('sas_key_name'))]"
+	},
+	"resources": [
+		{
+			"apiVersion": "2017-04-01",
+			"name": "[variables('unique_service_bus_namespace_name')]",
+			"type": "Microsoft.ServiceBus/namespaces",
+			"location": "[parameters('resource_location')]",
+			"sku": {
+				"name": "Standard"
+			},
+			"properties": {
+				"zoneRedundant": false
+			},
+			"resources": [
+				{
+					"apiVersion": "2017-04-01",
+					"name": "[parameters('queue_name')]",
+					"type": "queues",
+					"dependsOn": [
+						"[concat('Microsoft.ServiceBus/namespaces/', variables('unique_service_bus_namespace_name'))]"
+					],
+					"properties": {
+						"lockDuration": "PT30S",
+						"maxSizeInMegabytes": 1024,
+						"requiresDuplicateDetection": false,
+						"requiresSession": false,
+						"defaultMessageTimeToLive": "P14D",
+						"deadLetteringOnMessageExpiration": false,
+						"enableBatchedOperations": true,
+						"duplicateDetectionHistoryTimeWindow": "PT10M",
+						"maxDeliveryCount": 10,
+						"status": "Active",
+						"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+						"enablePartitioning": true,
+						"enableExpress": false
+					}
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+					"name": "[concat(variables('unique_service_bus_namespace_name'), '/EventDrivenSendListen')]",
+					"location": "[parameters('resource_location')]",
+					"properties": {
+						"rights": [
+							"Listen",
+							"Send"
+						]
+					},
+					"dependsOn": [
+						"[concat('Microsoft.ServiceBus/namespaces/', variables('unique_service_bus_namespace_name'))]"
+					]
+				},
+				{
+					"apiVersion": "2017-04-01",
+					"type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+					"name": "[concat(variables('unique_service_bus_namespace_name'), '/RootManageSharedAccessKey')]",
+					"location": "[parameters('resource_location')]",
+					"properties": {
+						"rights": [
+							"Listen",
+							"Manage",
+							"Send"
+						]
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+					]
+				},
+				{
+					"type": "Microsoft.ServiceBus/namespaces/topics",
+					"apiVersion": "2017-04-01",
+					"name": "[concat(variables('unique_service_bus_namespace_name'), '/', parameters('topic_name'))]",
+					"location": "[parameters('resource_location')]",
+					"properties": {
+						"defaultMessageTimeToLive": "P14D",
+						"maxSizeInMegabytes": 1024,
+						"requiresDuplicateDetection": false,
+						"duplicateDetectionHistoryTimeWindow": "PT10M",
+						"enableBatchedOperations": true,
+						"status": "Active",
+						"supportOrdering": false,
+						"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+						"enablePartitioning": true,
+						"enableExpress": false
+					},
+					"dependsOn": [
+						"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+					],
+					"resources": [
+						{
+							"type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+							"apiVersion": "2017-04-01",
+							"name": "[concat(variables('unique_service_bus_namespace_name'), '/', parameters('topic_name'), '/PessoaPA')]",
+							"location": "[parameters('resource_location')]",
+							"properties": {
+								"lockDuration": "PT5S",
+								"requiresSession": false,
+								"defaultMessageTimeToLive": "P14D",
+								"deadLetteringOnMessageExpiration": false,
+								"deadLetteringOnFilterEvaluationExceptions": false,
+								"maxDeliveryCount": 1,
+								"status": "Active",
+								"enableBatchedOperations": true,
+								"autoDeleteOnIdle": "P10675198DT2H48M5S"
+							},
+							"dependsOn": [
+								"[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('unique_service_bus_namespace_name'), parameters('topic_name'))]",
+								"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+							],
+							"resources": [
+								{
+									"type": "Microsoft.ServiceBus/namespaces/topics/subscriptions/rules",
+									"apiVersion": "2017-04-01",
+									"name": "[concat(variables('unique_service_bus_namespace_name'), '/', parameters('topic_name'), '/PessoaPA/UF-PA')]",
+									"location": "[parameters('resource_location')]",
+									"properties": {
+										"action": {},
+										"filterType": "CorrelationFilter",
+										"correlationFilter": {
+											"correlationId": "PA",
+											"properties": {}
+										}
+									},
+									"dependsOn": [
+										"[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', variables('unique_service_bus_namespace_name'), parameters('topic_name'), 'PessoaPA')]",
+										"[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('unique_service_bus_namespace_name'), parameters('topic_name'))]",
+										"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+									]
+								}
+							]
+						},
+						{
+							"type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+							"apiVersion": "2017-04-01",
+							"name": "[concat(variables('unique_service_bus_namespace_name'), '/', parameters('topic_name'), '/PessoaRS')]",
+							"location": "[parameters('resource_location')]",
+							"properties": {
+								"lockDuration": "PT30S",
+								"requiresSession": false,
+								"defaultMessageTimeToLive": "P14D",
+								"deadLetteringOnMessageExpiration": false,
+								"deadLetteringOnFilterEvaluationExceptions": false,
+								"maxDeliveryCount": 1,
+								"status": "Active",
+								"enableBatchedOperations": true,
+								"autoDeleteOnIdle": "P10675198DT2H48M5S"
+							},
+							"dependsOn": [
+								"[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('unique_service_bus_namespace_name'), parameters('topic_name'))]",
+								"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+							],
+							"resources": [
+								{
+									"type": "Microsoft.ServiceBus/namespaces/topics/subscriptions/rules",
+									"apiVersion": "2017-04-01",
+									"name": "[concat(variables('unique_service_bus_namespace_name'), '/', parameters('topic_name'), '/PessoaRS/UF-RS')]",
+									"location": "[parameters('resource_location')]",
+									"properties": {
+										"action": {},
+										"filterType": "CorrelationFilter",
+										"correlationFilter": {
+											"correlationId": "RS",
+											"properties": {}
+										}
+									},
+									"dependsOn": [
+										"[resourceId('Microsoft.ServiceBus/namespaces/topics/subscriptions', variables('unique_service_bus_namespace_name'), parameters('topic_name'), 'PessoaRS')]",
+										"[resourceId('Microsoft.ServiceBus/namespaces/topics', variables('unique_service_bus_namespace_name'), parameters('topic_name'))]",
+										"[resourceId('Microsoft.ServiceBus/namespaces', variables('unique_service_bus_namespace_name'))]"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"outputs": {
+		"NamespaceConnectionString": {
+			"type": "string",
+			"value": "[listkeys(variables('auth_rule_resource_id'), '2017-04-01').primaryConnectionString]"
+		},
+		"SharedAccessPolicyPrimaryKey": {
+			"type": "string",
+			"value": "[listkeys(variables('auth_rule_resource_id'), '2017-04-01').primaryKey]"
+		}
+	}
+}

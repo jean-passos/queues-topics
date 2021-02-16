@@ -1,0 +1,88 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+
+	"Description": "",
+
+	"Parameters": {
+		"QueueName": {
+			"Type": "String"
+		},
+		"TopicName": {
+			"Type": "String"
+		}
+	},
+
+	"Resources": {
+		"QueuePessoa": {
+			"Type": "AWS::SQS::Queue",
+			"Properties": {
+				"QueueName": { "Ref": "QueueName" }
+			}
+		},
+		"TopicPessoa": {
+			"Type": "AWS::SNS::Topic",
+			"Properties": {
+				"TopicName": { "Ref": "TopicName" }
+			}
+
+		},
+
+		"SubscriptionPessoaA": {
+			"Type": "AWS::SNS::Subscription",
+			"Properties": {
+				"Protocol": "sqs",
+				"RawMessageDelivery": true,
+				"TopicArn": {
+					"Ref": "TopicPessoa"
+				},
+				"Endpoint": {
+					"Fn::GetAtt": [ "SubscriptionQueuePessoaA", "Arn" ]
+				}
+			},
+			"DependsOn": [
+				"TopicPessoa",
+				"SubscriptionQueuePessoaA"
+			]
+		},
+
+		"SubscriptionPessoaB": {
+			"Type": "AWS::SNS::Subscription",
+			"Properties": {
+				"Protocol": "sqs",
+				"RawMessageDelivery": true,
+				"TopicArn": {
+					"Ref": "TopicPessoa"
+				},
+				"Endpoint": {
+					"Fn::GetAtt": [ "SubscriptionQueuePessoaB", "Arn" ]
+				}
+			},
+			"DependsOn": [
+				"TopicPessoa",
+				"SubscriptionQueuePessoaB"
+			]
+		},
+
+		"SubscriptionQueuePessoaA": {
+			"Type": "AWS::SQS::Queue",
+			"Properties": {
+				"QueueName": "queue_subscr_pessoa_A"
+			}
+		},
+		"SubscriptionQueuePessoaB": {
+			"Type": "AWS::SQS::Queue",
+			"Properties": {
+				"QueueName": "queue_subscr_pessoa_B"
+			}
+		}
+	},
+
+	"Outputs": {
+		"QueueURL": {
+			"Value": { "Ref": "QueuePessoa" }
+		},
+		"PessoaTopicArn": {
+			"Value": { "Ref": "TopicPessoa" }
+		}
+	}
+}
