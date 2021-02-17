@@ -18,13 +18,13 @@ namespace QueuesTopics.Service.Controllers
 		}
 
 		[HttpPost("queue")]
-		public IActionResult EnviaParaFila([FromBody]Pessoa pessoa)
+		public IActionResult SendPersonToQueue([FromBody]Person person)
 		{
 			string queueName = "fulano-q-pessoa";
 			try
 			{
 				using (var model = _connection.CreateModel())
-					model.BasicPublish("", queueName, null, SerializeObject.ConvertToByteArray(pessoa));
+					model.BasicPublish("", queueName, null, SerializeObject.ConvertToByteArray(person));
 
 				return Ok();
 			}
@@ -35,13 +35,13 @@ namespace QueuesTopics.Service.Controllers
 		}
 
 		[HttpPost("topic")]
-		public IActionResult EnviaParaTopico([FromBody]Pessoa pessoa)
+		public IActionResult SendPersonToTopic([FromBody]Person person)
 		{
 			string exchangeName = "fulano-e-pessoa";
 			try
 			{
 				using(var channel = _connection.CreateModel())
-					channel.BasicPublish(exchangeName, pessoa.Endereco.Estado, null, SerializeObject.ConvertToByteArray(pessoa));
+					channel.BasicPublish(exchangeName, person.Address.State, null, SerializeObject.ConvertToByteArray(person));
 
 				return Ok();
 			}

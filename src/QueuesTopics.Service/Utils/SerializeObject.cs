@@ -15,7 +15,5 @@ namespace QueuesTopics.Service.Utils
 		{
 			return Encoding.UTF8.GetBytes(ConvertToJson(toConvert));
 		}
-
-
 	}
 }

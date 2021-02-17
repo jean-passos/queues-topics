@@ -26,11 +26,11 @@ namespace QueuesTopics.Service.Controllers
 		}
 
 		[HttpPost("queue")]
-		public async Task<IActionResult> SendPersonToQueue([FromBody] Pessoa pessoa)
+		public async Task<IActionResult> SendPersonToQueue([FromBody] Person person)
 		{
 			try
 			{
-				SendMessageResponse messageResponse = await _amazonSQS.SendMessageAsync(CriaMensagemParaEnvio(pessoa));
+				SendMessageResponse messageResponse = await _amazonSQS.SendMessageAsync(BuildMessageToSend(person));
 				return Ok();
 			}
 			catch (Exception ex)
@@ -40,12 +40,12 @@ namespace QueuesTopics.Service.Controllers
 		}
 
 		[HttpPost("topic")]
-		public async Task<IActionResult> SendPersonToTopic([FromBody]Pessoa pessoa)
+		public async Task<IActionResult> SendPersonToTopic([FromBody]Person person)
 		{
 			try
 			{
 				string topicArn = _configuration.GetSection("AWSSNSService").GetSection("TopicArn").Value;
-				var response = await _simpleNotificationService.PublishAsync(topicArn, SerializeObject.ConvertToJson(pessoa));
+				var response = await _simpleNotificationService.PublishAsync(topicArn, SerializeObject.ConvertToJson(person));
 
 				return Ok();
 			}
@@ -56,10 +56,10 @@ namespace QueuesTopics.Service.Controllers
 			}
 		}
 
-		private SendMessageRequest CriaMensagemParaEnvio(Pessoa pessoa)
+		private SendMessageRequest BuildMessageToSend(Person person)
 		{
 			SendMessageRequest sendMessageRequest = new SendMessageRequest();
-			sendMessageRequest.MessageBody = SerializeObject.ConvertToJson(pessoa);
+			sendMessageRequest.MessageBody = SerializeObject.ConvertToJson(person);
 			return sendMessageRequest;
 		}
 	}

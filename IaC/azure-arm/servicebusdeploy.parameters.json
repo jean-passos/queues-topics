@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
 	"parameters": {
 		"service_bus_namespace_name": {
-			"value": "namespaceteste"
+			"value": "nsperson"
 		},
 		"resource_location": {
 			"value": "southcentralus"
 		},
 		"queue_name": {
-			"value": "queuetest"
+			"value": "pessoa-queue"
 		},
 		"topic_name": {
-			"value": "topictest"
+			"value": "pessoa-topic"
 		}
 	}
 }

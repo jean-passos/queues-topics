@@ -21,16 +21,15 @@ namespace QueuesTopics.Service.Controllers
 			_connectionString = _configuration.GetSection("ServiceBusNamespace").GetSection("ConnectionString").Value;
 		}
 
-
 		[HttpPost("queue")]
-		public async Task<IActionResult> SendToQueue([FromBody]Pessoa pessoa)
+		public async Task<IActionResult> SendToQueue([FromBody]Person person)
 		{
 			string queueName = _configuration.GetSection("ServiceBusNamespace").GetSection("QueueName").Value;
 
 			try
 			{
 				IQueueClient queueClient = new QueueClient(_connectionString, queueName);
-				Message message = new Message(SerializeObject.ConvertToByteArray(pessoa));
+				Message message = new Message(SerializeObject.ConvertToByteArray(person));
 				await queueClient.SendAsync(message);
 				return Ok();
 			}
@@ -40,16 +39,15 @@ namespace QueuesTopics.Service.Controllers
 			}
 		}
 
-
 		[HttpPost("topic")]
-		public async Task<IActionResult> SendToTopic([FromBody]Pessoa pessoa)
+		public async Task<IActionResult> SendToTopic([FromBody]Person person)
 		{
 			string topicName = _configuration.GetSection("ServiceBusNamespace").GetSection("TopicName").Value;
 			try
 			{
 				ITopicClient topicClient = new TopicClient(_connectionString, topicName);
-				Message message = new Message(SerializeObject.ConvertToByteArray(pessoa));
-				message.CorrelationId = pessoa.Endereco.Estado.ToUpper();
+				Message message = new Message(SerializeObject.ConvertToByteArray(person));
+				message.CorrelationId = person.Address.State.ToUpper();
 				await topicClient.SendAsync(message);
 				return Ok();
 			}

@@ -1,10 +1,10 @@
 [
 	{
 		"ParameterKey": "QueueName",
-		"ParameterValue": "cfn-pessoa-queue"
+		"ParameterValue": "pessoa-queue"
 	},
 	{
 		"ParameterKey": "TopicName",
-		"ParameterValue": "cfn-pessoa-topic"
+		"ParameterValue": "pessoa-topic"
 	}
 ]

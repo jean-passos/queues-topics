@@ -11,34 +11,34 @@ namespace QueuesTopics.Service.Test
 	public class AWSTest : BaseSetupTearDown
 	{
 		[Test]
-		public async Task EnviaPessoaParaFila()
+		public async Task SendPersonToAWSSQS()
 		{
 			var body = new
 			{
-				nome = "Agatha Rebeca Aragão",
-				data_nasc = "12/06/1965",
-				sexo = "Feminino",
-				pai = "Kauê Tiago Aragão",
-				mae = "Louise Isabella Sophia",
-				documento = new
+				name = "Agatha Rebeca Aragão",
+				birthDate = "12/06/1965",
+				gender = "Feminino",
+				fatherName = "Kauê Tiago Aragão",
+				motherName = "Louise Isabella Sophia",
+				document = new
 				{
 					cpf = "45823022387",
 					rg = "297496086"
 				},
-				contato = new
+				contact = new
 				{
 					email = "agatharebecaaragao@trilhavitoria.com.br",
-					telefone_fixo = "7928321079",
-					celular = "79992517053"
+					phone = "7928321079",
+					cellPhone = "79992517053"
 				},
-				endereco = new
+				address = new
 				{
-					cep = "49075270",
-					endereco = "Rua Frei Luiz Canolo de Noronha",
-					numero = 362,
-					bairro = "Siqueira Campos",
-					cidade = "Aracaju",
-					estado = "SE"
+					zipCode = "49075270",
+					address = "Rua Frei Luiz Canolo de Noronha",
+					number = 362,
+					neighborhood = "Siqueira Campos",
+					city = "Aracaju",
+					state = "SE"
 				}
 			};
 
@@ -51,34 +51,34 @@ namespace QueuesTopics.Service.Test
 		}
 
 		[Test]
-		public async Task EnviaPessoaParaTopico()
+		public async Task SendPersonToAWSSNS()
 		{
 			var body = new
 			{
-				nome = "Allana Valentina Pereira",
-				data_nasc = "06/01/1998",
-				sexo = "Feminino",
-				mae = "Aline Louise",
-				pai = "Osvaldo Lucca Geraldo Pereira",
-				documento = new
+				name = "Allana Valentina Pereira",
+				birthDate = "06/01/1998",
+				gender = "Feminino",
+				motherName = "Aline Louise",
+				fatherName = "Osvaldo Lucca Geraldo Pereira",
+				document = new
 				{
 					cpf = "97349155417",
 					rg = "313602499"
 				},
-				contato = new
+				contact = new
 				{
 					email = "allanavalentina@yahooo.com.br",
-					telefone_fixo = "8429492843",
-					celular = "84993573974"
+					phone = "8429492843",
+					cellPhone = "84993573974"
 				},
-				endereco = new
+				address = new
 				{
-					cep = "59035546",
-					endereco = "Vila Presidente Mascarenhas",
-					numero = 507,
-					bairro = "Alecrim",
-					cidade = "Natal",
-					estado = "RN"
+					zipCode = "59035546",
+					address = "Vila Presidente Mascarenhas",
+					number = 507,
+					neighborhood = "Alecrim",
+					city = "Natal",
+					state = "RN"
 				}
 			};
 
