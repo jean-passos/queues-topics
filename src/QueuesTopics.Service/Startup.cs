@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QueuesTopics.Service.Settings;
 using RabbitMQ.Client;
 
 namespace QueuesTopics.Service
@@ -20,15 +21,12 @@ namespace QueuesTopics.Service
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			ConnectionFactory rabbitMQConnectionFactory = new ConnectionFactory();
+			Configuration.Bind("RabbitMQ", rabbitMQConnectionFactory);
+			services.AddSingleton(rabbitMQConnectionFactory.CreateConnection());
 
-			services.AddSingleton(rabbitConnection => 
-			{
-				var factory = new ConnectionFactory();
-				factory.HostName = "";
-				factory.UserName = "";
-				factory.Password = "";
-				return factory.CreateConnection();
-			});
+			services.Configure<ResourceNameSettings>(Configuration.GetSection("ResourceName"));
+			services.Configure<AWSSNSSettings>(Configuration.GetSection("AWSSNS"));
 
 			services.AddAWSService<IAmazonSQS>(Configuration.GetAWSOptions("AWSSQSService"));
 			services.AddAWSService<IAmazonSimpleNotificationService>(Configuration.GetAWSOptions("AWSSNSService"));

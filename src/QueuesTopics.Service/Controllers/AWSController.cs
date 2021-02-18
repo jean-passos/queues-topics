@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using QueuesTopics.Service.Settings;
 
 namespace QueuesTopics.Service.Controllers
 {
@@ -17,12 +19,14 @@ namespace QueuesTopics.Service.Controllers
 		private readonly IAmazonSQS _amazonSQS;
 		private readonly IAmazonSimpleNotificationService _simpleNotificationService;
 		private readonly IConfiguration _configuration;
+		private readonly AWSSNSSettings _awsSNSSettings;
 
-		public AWSController(IAmazonSQS amazonSQS, IAmazonSimpleNotificationService simpleNotificationService, IConfiguration configuration)
+		public AWSController(IAmazonSQS amazonSQS, IAmazonSimpleNotificationService simpleNotificationService, IConfiguration configuration, IOptions<AWSSNSSettings> awsSNSOptions)
 		{
 			_amazonSQS = amazonSQS;
 			_simpleNotificationService = simpleNotificationService;
 			_configuration = configuration;
+			_awsSNSSettings = awsSNSOptions.Value;
 		}
 
 		[HttpPost("queue")]
@@ -44,9 +48,7 @@ namespace QueuesTopics.Service.Controllers
 		{
 			try
 			{
-				string topicArn = _configuration.GetSection("AWSSNSService").GetSection("TopicArn").Value;
-				var response = await _simpleNotificationService.PublishAsync(topicArn, SerializeObject.ConvertToJson(person));
-
+				var response = await _simpleNotificationService.PublishAsync(_awsSNSSettings.TopicArn, SerializeObject.ConvertToJson(person));
 				return Ok();
 			}
 			catch (Exception ex)

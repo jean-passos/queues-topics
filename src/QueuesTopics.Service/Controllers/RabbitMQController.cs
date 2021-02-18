@@ -3,6 +3,8 @@ using QueuesTopics.Service.Utils;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 using System;
+using QueuesTopics.Service.Settings;
+using Microsoft.Extensions.Options;
 
 namespace QueuesTopics.Service.Controllers
 {
@@ -11,20 +13,21 @@ namespace QueuesTopics.Service.Controllers
 	public class RabbitMQController : ControllerBase
 	{
 		private readonly IConnection _connection;
+		private readonly ResourceNameSettings _resourceNameSettings;
 
-		public RabbitMQController(IConnection connection)
+		public RabbitMQController(IConnection connection, IOptions<ResourceNameSettings> resourceNameOptions)
 		{
 			_connection = connection;
+			_resourceNameSettings = resourceNameOptions.Value;
 		}
 
 		[HttpPost("queue")]
 		public IActionResult SendPersonToQueue([FromBody]Person person)
 		{
-			string queueName = "fulano-q-pessoa";
 			try
 			{
 				using (var model = _connection.CreateModel())
-					model.BasicPublish("", queueName, null, SerializeObject.ConvertToByteArray(person));
+					model.BasicPublish("", _resourceNameSettings.Queue, null, SerializeObject.ConvertToByteArray(person));
 
 				return Ok();
 			}
@@ -37,11 +40,10 @@ namespace QueuesTopics.Service.Controllers
 		[HttpPost("topic")]
 		public IActionResult SendPersonToTopic([FromBody]Person person)
 		{
-			string exchangeName = "fulano-e-pessoa";
 			try
 			{
 				using(var channel = _connection.CreateModel())
-					channel.BasicPublish(exchangeName, person.Address.State, null, SerializeObject.ConvertToByteArray(person));
+					channel.BasicPublish(_resourceNameSettings.Topic, person.Address.State, null, SerializeObject.ConvertToByteArray(person));
 
 				return Ok();
 			}
